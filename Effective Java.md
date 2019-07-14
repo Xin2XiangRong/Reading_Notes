@@ -646,7 +646,72 @@ public calss MySet<E> extends AbstractSet<E> {
 
 每种泛型定义一组参数化的类型，构成格式为：先是类或者接口的名称，接着用尖括号(<>)把对应于泛型形式类型参数的实际类型参数列表括起来。例如，List<String>是一个参数化的类型，表示元素类型为String的列表。（String是与形式类型参数E（List<E>)相对应的实际类型参数。
 
+最后一点，每个泛型都定义一个*原生态类型*，即不带任何实际类型参数的泛型名称。例如，与List<E>相对应的原生态类型是List。原生态类型就像从类型声明中删除了所有泛型信息一样。
 
+如果不提供类型参数，使用集合类型和其他泛型也是合法的，但是不应该这么做。*如果使用原生态类型，就失掉了泛型在安全性和表述性方面的所有优势*。之所以java的设计者还要允许使用原生态类型，是为了提供兼容性。
+
+虽然不应该在新代码中使用像List这样的原生态类型，使用参数化的类型以允许插入任意对象，如List<Object>，这还是可以的。原生态类型List和参数化的类型List<Object>之间到底有什么区别呢？不严格地说，前者逃避了泛型检查，后者则明确告知编译器，它能够持有任意类型的对象。虽然可以将List<String>传递给类型List的参数，但是不能将它传给类型List<Object>的参数。**泛型有子类型化的规则，List<String>是原生态类型List的一个子类型，而不是参数化类型List<Object>的子类型**。因此，如果使用像List这样的原生态类型，就会失掉类型安全性，但是如果使用像List<Object>这样的参数化类型则不会。
+
+这条规则有两个例外：
+
+1. 在类文字中必须使用原生态类型。规范不允许使用参数化类型。换句话说，List.class，String[].class和int.class都合法，但是List<String>.class和List<?>.class则不合法
+2. 由于泛型信息可以在运行时被擦除，因此在参数化类型而非无限制通配符类型上使用instanceof操作符是非法的。用无限制通配符类型代替原生态类型，对instanceof操作夫的行为不会产生任何影响。在这种情况下，尖括号(<>)和问号(?)就显得多余了。下面是利用泛型来使用instanceof操作夫的首选方法
+
+~~~java
+//Legitimate use of raw type - instanceof operator
+if(o instanceof Set) {  //Raw type
+    Set<?> m = (Set<?>) o;  //Wildcard type
+}
+~~~
+
+#### 24. 消除非受检警告
+
+用泛型编程时，会遇到许多编译器警告：非受检强制转化警告（unchecked cast warnings）、非受检方法调用警告、非受检普通数组创建警告，以及非受检转换警告（unchecked conversion warnings）
+
+要尽可能的消除每一个非受检警告。*如果无法消除警告，同时可以证明引起警告的代码是类型安全的，（只有在这种情况下才），可以用一个@SuppressWarning("unchecked")注解来禁止这条警告*。如果在禁止警告之前没有先证实代码类型是安全的，那就只是给自己一种错误的安全感而已，在运行时可能会抛出ClassCastException异常。
+
+SuppressWarnings注解可以用在任何粒度的级别中，从单独的局部变量声明到整个类都可以。*应该始终在尽可能小的范围中使用SuppressWarnings注解*。它通常是个变量声明，或是非常剪短的方法或构造器。如果你发现自己在长度不止一行的方法或者构造器中使用了SuppressWarnings注解，可以将它移到一个局部变量的声明中。虽然你必须声明一个新的变量，不过这么做还是值得的。例如，考虑ArrayList类中的toArray方法：
+
+~~~~java
+public <T> T[] toArray(T[] a) {
+    if(a.length<size) {
+        return (T[]) Arrays.copyOf(elements, size, a.getClass());
+    }
+    if(a.length>size) {
+        a[size] = null;
+    }
+    return a;
+}
+~~~~
+
+如果编译ArrayList，该方法就会产生这条警告：
+
+~~~java
+ArrayList.java:305:warning:[unchecked] uncheckd cast
+found : Object[], required: T[]
+	return (T[]) Arrays.copyOf(elements, size, a.getClass());
+~~~
+
+将SuppressWarnings注解放在return语句中是非法的，因为它不是一个声明。可以声明一个局部变量来保存返回值，并注解其声明
+
+~~~~java
+/add local variable to reduce scope of @SuppressWarnings
+public <T> T[] toArray(T[] a) {
+    if(a.length<size) {
+        //this cast is correct because the array we're creating
+        //is of the same type as the one passed in, which is T[]
+        @SuppressWarnings("unchecked")
+        T[] result = (T[]) Arrays.copyOf(elements, size, a.getClass());
+        return result;
+    }
+    if(a.length>size) {
+        a[size] = null;
+    }
+    return a;
+}
+~~~~
+
+总而言之，非受检警告很重要，不要忽略他们。每一条警告都表示可能在运行时抛出ClassCastException异常。要尽最大努力消除这些警告。如果无法消除这些警告，同时可以证明引起警告的代码是类型安全的，就可以在尽可能小的范围中，用@SuppressWarnings("unchecked")注解禁止该警告。要用注解把禁止该警告的原因记录下来。
 
 
 
