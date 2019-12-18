@@ -1,0 +1,44 @@
+Windows下删除topic的步骤:
+	1.修改kafka配置文件"server.properties"
+		添加 delete.topic.enable=true
+	2.执行删除topic的命令:
+		kafka-topics.bat --zookeeper localhost:2181 --delete --topic [topic name]
+		PS: 这条命令其实并不执行删除动作，仅仅是在zookeeper上标记该topic要被删除而已，同时也提醒用户一定要提前打开delete.topic.enable开关，否则删除动作是不会执行的。
+			命令执行后控制台输出:
+			Topic test-topic is marked for deletion.
+			Note: This will have no impact if delete.topic.enable is not set to true.
+	3.执行zookeeper安装目录下\bin中的zkCli.cmd(zookeeper的客户端)
+		获取全部的topic列表:	ls /brokers/topics
+		删除指定的topic:		rmr /brokers/topics/[topic name]
+	4.删除磁盘中的日志文件
+		根据kafka配置文件"server.properties"中log.dirs对应的路径即可找到日志位置
+
+
+启动kafka:
+.\bin\windows\kafka-server-start.bat .\config\server.properties
+
+创建topic:
+kafka-topics.bat --create --zookeeper localhost:2181 --replication-factor 1 --partitions 1 --topic [topic name]
+查看全部topic:
+kafka-topics.bat --list --zookeeper localhost:2181
+查看具体的某个topic的详细信息:
+kafka-topics.bat --topic __consumer_offsets --describe --zookeeper localhost:2181
+删除topic:
+kafka-topics.bat --zookeeper localhost:2181 --delete --topic [topic name]
+
+所有的消费者组
+kafka-consumer-groups.bat --bootstrap-server localhost:9092  --list
+查看group的offset消费记录
+kafka-consumer-groups.bat --bootstrap-server localhost:9092 --describe --group [group name]
+删除group
+kafka-consumer-groups.bat --bootstrap-server localhost:9092  --delete --group [group name]
+
+创建生产者命令:
+kafka-console-producer.bat --broker-list localhost:9092 --topic [topic name]
+创建消费者命令:
+kafka-console-consumer.bat --bootstrap-server localhost:9092 --topic [topic name] --from-beginning
+
+运行kafka自带的生产者性能测试脚本:
+kafka-producer-perf-test.bat --topic [topic name] --num-records 1000000 --record-size 1000 --throughput 20000 --producer-props bootstrap.servers=localhost:9092
+运行kafka自带的消费者性能测试脚本:
+kafka-consumer-perf-test.bat --broker-list localhost:9092 --topic [topic name] --fetch-size 1048576 --messages 1000000 --threads 1

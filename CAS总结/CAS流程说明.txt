@@ -1,0 +1,35 @@
+1、通过浏览器(GET)访问 "http://app.example.com/'，通过CAS协议访问CAS客户端
+受保护的App.
+
+2、CAS 客户端发现访问是没有认证的,所以携带着配置的Service查询参数重定向到CAS进行
+认证,对URL:"http://app.example.com/"进行加密.
+
+3、浏览器地址此时为："http://app.example.com/cas/login?service=
+    https%3A%2F%2Fapp.example.com%2F",再GET该地址请求CAS Server.
+
+4、CAS Server 发现用户此时没有SSO Session,所以重定向到login表单页面.
+
+5、用户录入登录信息，Post提交："http://app.example.com/cas/login?
+    service= https%3A%2F%2Fapp.example.com%2F",重新请求到CAS Server,
+   认证用户名、密码、ticket ,用户认证成功，则创建SSO Session CASTGC cookie
+   包含了这个TGT(Ticket Granting Ticket),这个TGT是该用户的SSO Session key.
+
+6、CAS 设置cookie,包含CASTGC=TGT-2345678 重定向"http://app.example.com/
+    ?ticket=ST-12345678"请求CAS 客户端
+
+7、CAS 客户端校验来自CAS Server携带的Ticket(ST)，通过调用 GET "http://app.
+example.com/serviceValidate?service= https%3A%2F%2Fapp.example.com%2F&
+ticket=ST-12345678"请求CAS Server.
+
+8、CAS Server 返回包含成功的标识、认证的对象和可选属性的XML文档
+
+9、CAS 客户端设置session和cookie,重新取消ST的展示，该步骤为可选择的,主要防止
+浏览器地址展示ST，设置后的Cookie:JSESSIONID=ABC1234567,重定向地址到
+"http://app.example.com/"
+
+10、浏览器携带Cookie:JSESSIONID=ABC1234567 GET "http://app.example.com/"
+请求CAS 客户端
+
+11、CAS 客户端校验 Session cookie ,返回请求app的资源页面
+
+12、浏览器展示 app 资源信息
