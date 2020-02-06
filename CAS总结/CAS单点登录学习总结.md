@@ -546,6 +546,43 @@ sendTicketGrantingTicketAction是用来控制TGT创建和销毁的，然后走�
    </servlet-mapping>
    ```
 
-   #### 2、几次错误输入后需要输入验证码
+#### 2、几次错误输入后需要输入验证码
 
-   
+1. 添加UsersAuthenticationHandler类，并重写，其继承自AbstractUsernamePasswordAuthenticationHandler。在这个类中完成用户名、密码的校验和当校验不通过时增加计数。  
+
+   ```xml
+   <bean id="codeAuthHandler" class="pers.chai.demo2.authcode.UsersAuthenticationHandler">
+       <property name="accountService" ref="accountService"/>
+   </bean>
+   ```
+
+   然后把codeAuthHandler交给authenticationManager管理。
+
+2. 类MyAuthenticationViaFormAction中完成点击“登录”时的逻辑。
+
+3. 在casLoginVeiwRe.jsp中加入<c:if test="${errorNum>=5}"> </c:if>判断是否需要显示验证码  
+
+4. 在web.xml中添加 
+
+   ```xml
+   <servlet-mapping>
+       <servlet-name>jcaptcha</servlet-name>
+       <url-pattern>/captcha.htm</url-pattern>
+   </servlet-mapping>
+   ```
+
+我一开始参考博文：https://my.oschina.net/u/1412897/blog/1560440?tdsourcetag=s_pcqq_aiomsg；https://www.cnblogs.com/wangyang108/p/5844430.html的方式，希望用配置CaptchaImageCreateController的方式实现验证码的生成，但是总是显示不出来，也没有定位到具体的原因。？？？
+
+最后只能在上一节的基础上作更改，最后成功了，得到了想要的效果。
+
+### 六、登出
+
+参考博文：https://my.oschina.net/thinwonton/blog/1475562?from=timeline
+
+整个注销流程大致可分为TGT解码和Ticket销魂两个步骤：
+
+1. TGT解码：CAS服务接收请求后，获取浏览器的Cookie中的TGC信息，对TGC信息进行解密，解密后将获取到TGT的ID，然后由CentralAuthenticationServiceImpl 类的destroyTicketGrantingTicket()方法注销该TGT。 
+2. Ticket销毁：先完成客户端Ticket（ST）销毁，再完成CAS服务器的Ticket（TGT）销毁。对应CentralAuthenticationServiceImpl 类的 destroyTicketGrantingTicket()方法。
+
+如果想要登出后跳转到service后的地址，需要把cas_servlet.xml里的logoutAction参数的cas.logout.followServiceRedirects设为true。URL示例：http://10.192.33.26:38080/cas/logout?service=http%3A%2F%2F10.192.33.37%3A8081%2Fdemo1%2Fbye
+
