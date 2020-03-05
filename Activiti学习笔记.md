@@ -77,6 +77,8 @@ Activiti：覆盖了业务流程管理、工作流、服务协作等领域的一
 
 ### 二、BPMN2.0规范
 
+Business Process Modeling Notation（简称BPMN），中文译为业务流程建模标注。BPMN定义了业务流程图，其基于流程图技术，同时对创建业务流程操作的图形化模型进行了裁剪。
+
 ![1581170090462](01_picture/Activiti%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/1581170090462.png)
 
 ![1581170175335](01_picture/Activiti%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/1581170175335.png)![1581170191193](01_picture/Activiti%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/1581170191193.png)
