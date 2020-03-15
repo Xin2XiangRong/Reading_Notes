@@ -686,3 +686,7 @@ rename-command FLUSHALL ""
 
 ![1582688695502](01_picture/redis%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95/1582688695502.png)
 
+### 十一、转：Spring中使用RedisTemplate操作Redis（spring-data-redis）
+
+https://www.cnblogs.com/EasonJim/p/7803067.html
+
