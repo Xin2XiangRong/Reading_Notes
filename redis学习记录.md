@@ -690,3 +690,21 @@ rename-command FLUSHALL ""
 
 https://www.cnblogs.com/EasonJim/p/7803067.html
 
+### 十二、哨兵模式集群配置
+
+https://www.cnblogs.com/ruiati/p/6374152.html
+
+https://www.cnblogs.com/fu-yong/p/9252837.html
+
+先修改redis.conf文件，完成主从配置。启动方式：redis-server redis.conf
+
+修改sentinel.conf文件，完成哨兵集群配置。启动方式：redis-sentinel sentinel.conf
+
+```properties
+port :当前Sentinel服务运行的端口  
+sentinel monitor mymaster 127.0.0.1 6379 2:Sentinel去监视一个名为mymaster的主redis实例，这个主实例的IP地址为本机地址127.0.0.1，端口号为6379，而将这个主实例判断为失效至少需要2个 Sentinel进程的同意，只要同意Sentinel的数量不达标，自动failover就不会执行  
+sentinel down-after-milliseconds mymaster 5000:指定了Sentinel认为Redis实例已经失效所需的毫秒数。当 实例超过该时间没有返回PING，或者直接返回错误，那么Sentinel将这个实例标记为主观下线。只有一个 Sentinel进程将实例标记为主观下线并不一定会引起实例的自动故障迁移：只有在足够数量的Sentinel都将一个实例标记为主观下线之后，实例才会被标记为客观下线，这时自动故障迁移才会执行  
+sentinel parallel-syncs mymaster 1：指定了在执行故障转移时，最多可以有多少个从Redis实例在同步新的主实例，在从Redis实例较多的情况下这个数字越小，同步的时间越长，完成故障转移所需的时间就越长  
+sentinel failover-timeout mymaster 15000：如果在该时间（ms）内未能完成failover操作，则认为该failover失败  
+```
+
