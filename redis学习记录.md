@@ -696,6 +696,8 @@ https://www.cnblogs.com/ruiati/p/6374152.html
 
 https://www.cnblogs.com/fu-yong/p/9252837.html
 
+深入理解Redis高可用方案-Sentinel：https://www.cnblogs.com/ivictor/p/9755065.html
+
 先修改redis.conf文件，完成主从配置。启动方式：redis-server redis.conf
 
 修改sentinel.conf文件，完成哨兵集群配置。启动方式：redis-sentinel sentinel.conf
